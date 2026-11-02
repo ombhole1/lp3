@@ -1,0 +1,68 @@
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import confusion_matrix, accuracy_score, precision_score, recall_score
+
+# ------------------------------------------
+# 1. Read dataset
+# ------------------------------------------
+df = pd.read_csv("diabetes.csv")
+print(df.head())
+print(df.shape)
+print(df.isnull().sum())
+print(df["Outcome"].value_counts())
+
+# ------------------------------------------
+# 2. Pre-process
+# ------------------------------------------
+# These columns cannot be 0 in real life, so zeros are treated as missing
+# and replaced with the column median
+cols = ["Glucose", "BloodPressure", "SkinThickness", "Insulin", "BMI"]
+df[cols] = df[cols].replace(0, np.nan)
+df[cols] = df[cols].fillna(df[cols].median())
+
+# Separate features and target
+X = df.drop("Outcome", axis=1)
+y = df["Outcome"]
+
+# ------------------------------------------
+# 3. Split dataset
+# ------------------------------------------
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+
+# ------------------------------------------
+# 4. Normalize data
+# ------------------------------------------
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+# ------------------------------------------
+# 5. Train KNN model
+# ------------------------------------------
+model = KNeighborsClassifier(n_neighbors=5)
+model.fit(X_train, y_train)
+
+# ------------------------------------------
+# 6. Predict
+# ------------------------------------------
+y_pred = model.predict(X_test)
+
+# ------------------------------------------
+# 7. Calculate performance metrics
+# ------------------------------------------
+cm = confusion_matrix(y_test, y_pred)
+accuracy = accuracy_score(y_test, y_pred)
+error_rate = 1 - accuracy
+precision = precision_score(y_test, y_pred, zero_division=0)
+recall = recall_score(y_test, y_pred, zero_division=0)
+
+print("\nConfusion Matrix:\n", cm)
+print("Accuracy:", accuracy)
+print("Error Rate:", error_rate)
+print("Precision:", precision)
+print("Recall:", recall)
