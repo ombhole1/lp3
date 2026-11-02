@@ -1,0 +1,41 @@
+import pandas as pd
+import numpy as np
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.metrics import r2_score,mean_squared_error
+
+df=pd.read_csv("uber.csv")
+df
+
+df= df.dropna().drop_duplicates()
+df
+
+Q1,Q3=df.fare_amount.quantile([0.25,0.75])
+IQR= Q3-Q1
+df= df[(df.fare_amount >= Q1 - 1.5*IQR) & (df.fare_amount <= Q3 + 1.5*IQR)]
+
+print(df.select_dtypes("number").corr())
+
+x=df[["pickup_longitude","pickup_latitude","dropoff_longitude","dropoff_latitude","passenger_count"]]
+y=df["fare_amount"]
+
+x_train,x_test,y_train,y_test=train_test_split(x,y,test_size=0.2,random_state=42)
+
+lr= LinearRegression()
+lr.fit(x_train,y_train)
+p1 = lr.predict(x_test)
+
+rf = RandomForestRegressor(n_estimators=10,random_state=42)
+rf.fit(x_train,y_train)
+p2 = rf.predict(x_test)
+
+print("R2 Score for linear regression: ",r2_score(y_test,p1))
+
+print("meansquared error for linear regression: ",mean_squared_error(y_test,p1))
+
+print("R2 Score for randomforest: ",r2_score(y_test,p2))
+
+print("R2 Score for randomforest: ",mean_squared_error(y_test,p2))
+
