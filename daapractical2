@@ -1,0 +1,41 @@
+n= int(input("Enter number of items: "))
+
+weight=[]
+profit=[]
+
+for i in range(n):
+    w=int(input("enter weight of item: "))
+    p=int(input("enter profit of item: "))
+    weight.append(w)
+    profit.append(p)
+
+capacity=int(input("Enter capacity of knapsack: "))
+
+ratio=[]
+
+for i in range(n):
+    r=weight[i]/profit[i]
+    ratio.append(i)
+
+for i in range(n):
+    for j in range(i+1,n):
+        if ratio[i] <= ratio[j]:
+            ratio[i],ratio[j]=ratio[j],ratio[i]
+            weight[i],weight[j]=weight[j],weight[i]
+            profit[i],profit[j]=profit[j],profit[i]
+
+total_profit=0
+steps=0
+
+for i in range(n):
+    steps=steps+1
+    if weight[i]<=capacity:
+        total_profit=total_profit+profit[i]
+        capacity=capacity-weight[i]
+
+    else:
+        total_profit=total_profit + ratio[i]*capacity
+        break
+
+print("Maximum profit: ",total_profit)
+print("Steps Count: ",steps)
